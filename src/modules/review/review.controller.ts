@@ -9,10 +9,14 @@ import {
 } from '@nestjs/common';
 import { ReviewService } from './review.service';
 import { CreateReviewDto } from './dtos/createreview.dto';
+import { ClassService } from '../class/class.service';
 
-@Controller('api/sports')
+@Controller('api/reviews')
 export class ReviewController {
-  constructor(private readonly reviewService: ReviewService) {}
+  constructor(
+    private readonly reviewService: ReviewService,
+    private readonly classService: ClassService,
+  ) {}
 
   @Get()
   async getAllReviews() {
@@ -25,7 +29,6 @@ export class ReviewController {
       );
     }
   }
-
   @Post()
   @Header('Content-Type', 'appliation/json')
   async createReview(
@@ -34,6 +37,12 @@ export class ReviewController {
     try {
       const review = await this.reviewService.createReview(reviewDto);
       console.log('New review successfully created');
+      const sportClass = await this.classService.getClassById(
+        review.sportClass.id,
+      );
+      sportClass.averageRating = sportClass.updateAverageRating();
+      await this.classService.updateClass(sportClass.id, sportClass);
+
       return review;
     } catch (err) {
       for (const key in reviewDto) {
@@ -45,8 +54,9 @@ export class ReviewController {
             `Information about ${key} is required, but was not provided`,
             HttpStatus.BAD_REQUEST,
           );
-        } else console.log(err);
+        }
       }
+      throw new Error(err.detail);
     }
   }
 }

@@ -12,10 +12,16 @@ import {
 } from '@nestjs/common';
 import { CreateSportDto } from './dtos/createSport.dto';
 import { SportService } from './sport.service';
+import { Sport } from './sport.enitity';
+import { idException } from 'src/exceptions/idException';
+import { ClassService } from '../class/class.service';
 
 @Controller('api/sports')
 export class SportController {
-  constructor(private readonly sportService: SportService) {}
+  constructor(
+    private readonly sportService: SportService,
+    private readonly classServce: ClassService,
+  ) {}
 
   @Get()
   async getAllSports() {
@@ -33,10 +39,7 @@ export class SportController {
     try {
       return await this.sportService.getSportById(id);
     } catch {
-      throw new HttpException(
-        'Sport with given id does not exist',
-        HttpStatus.NOT_FOUND,
-      );
+      throw idException;
     }
   }
   @Post()
@@ -46,7 +49,7 @@ export class SportController {
   ): Promise<CreateSportDto | void> {
     try {
       const sport = await this.sportService.createSport(sportDto);
-      console.log('Successfully created new user');
+      console.log('Successfully created new sport');
       return sport;
     } catch (err) {
       for (const key in sportDto) {
@@ -63,17 +66,18 @@ export class SportController {
     }
   }
   @Put(':id')
-  async updateSport(
-    @Param('id') id: number,
-    @Body() updateSportDto: CreateSportDto,
-  ) {
+  async updateSport(@Param('id') id: number, @Body() updatedSport: Sport) {
     try {
-      return await this.sportService.updateSport(id, updateSportDto);
+      const sport = await this.sportService.updateSport(id, updatedSport);
+      const sportClasses = await this.classServce.getClassesBySportId(sport.id);
+      for (let i = 0; i < sportClasses.length; i++) {
+        const sportClass = sportClasses[i];
+        sportClass.duration = sport.classDuration;
+        await this.classServce.updateClass(sportClass.id, sportClass);
+      }
+      return sport;
     } catch {
-      throw new HttpException(
-        'Sport with given id does not exist',
-        HttpStatus.NOT_FOUND,
-      );
+      throw idException;
     }
   }
   @Delete(':id')
@@ -81,10 +85,7 @@ export class SportController {
     try {
       return await this.sportService.deleteSport(id);
     } catch {
-      throw new HttpException(
-        'Sport with given id does not exist',
-        HttpStatus.NOT_FOUND,
-      );
+      throw idException;
     }
   }
 }

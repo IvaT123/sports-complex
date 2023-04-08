@@ -14,41 +14,33 @@ export class SportService {
   async getAllSports(): Promise<ReadSportDto[]> {
     return await this.sportRepository.find();
   }
-  async getSportById(id: number): Promise<ReadSportDto> {
-    return await this.sportRepository.findOneOrFail({
-      where: {
-        id: id,
-      },
-      relations: {
-        ageGroups: true,
-        users: true,
-        reviews: true,
-      },
+  async getSportById(id: number): Promise<Sport> {
+    return await this.sportRepository.findOne({
+      where: { id: id },
+      relations: ['users', 'users', 'classes'],
     });
   }
-  async createSport(item: CreateSportDto): Promise<CreateSportDto> {
-    const sport = new CreateSportDto(
-      item.id,
-      item.name,
-      item.description,
-      item.classDuration,
-      item.ageGroups,
-    );
+  async createSport(item: CreateSportDto): Promise<Sport> {
+    const sport = new CreateSportDto(item.id, item.name, item.classDuration);
     return await this.sportRepository.save(sport);
   }
-  async updateSport(id: number, item: CreateSportDto): Promise<CreateSportDto> {
-    const user = await this.sportRepository.findOneByOrFail({ id: id });
-    const updatedUser = await this.sportRepository.save({
-      id: user.id,
+  async updateSport(id: number, item: Sport): Promise<Sport> {
+    const sport = await this.sportRepository.findOneByOrFail({ id: id });
+
+    const updatedSport = await this.sportRepository.save({
+      id: sport.id,
       name: item.name,
-      age: item.description,
-      email: item.classDuration,
-      sports: item.ageGroups,
+      classDuration: item.classDuration,
+      users: item.users,
+      classes: item.classes,
     });
-    return updatedUser;
+    return updatedSport;
   }
   async deleteSport(id: number): Promise<HttpStatus.ACCEPTED> {
-    await this.sportRepository.delete(id);
-    return HttpStatus.ACCEPTED;
+    const sport = await this.sportRepository.findOneByOrFail({ id: id });
+    if (sport) {
+      await this.sportRepository.delete(id);
+      return HttpStatus.ACCEPTED;
+    }
   }
 }

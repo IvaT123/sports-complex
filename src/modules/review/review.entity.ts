@@ -1,5 +1,5 @@
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { Sport } from '../sport/sport.enitity';
+import { Class } from '../class/class.entity';
 
 @Entity()
 export class Review {
@@ -12,6 +12,6 @@ export class Review {
   @Column()
   comment: string;
 
-  @ManyToOne(() => Sport, (sport) => sport.reviews)
-  sport: Sport;
+  @ManyToOne(() => Class, (sportClass) => sportClass.reviews)
+  sportClass: Class;
 }

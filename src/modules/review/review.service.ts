@@ -20,7 +20,7 @@ export class ReviewService {
       item.id,
       item.rating,
       item.comment,
-      item.sport,
+      item.sportClass,
     );
     return await this.reviewRepository.save(review);
   }

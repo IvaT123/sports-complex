@@ -1,5 +1,5 @@
 import { IsNotEmpty, Min, IsNumber, Max, MaxLength } from 'class-validator';
-import { Sport } from 'src/modules/sport/sport.enitity';
+import { Class } from 'src/modules/class/class.entity';
 
 export class CreateReviewDto {
   public readonly id: number;
@@ -16,12 +16,12 @@ export class CreateReviewDto {
   public readonly comment: string;
 
   @IsNotEmpty()
-  public readonly sport: Sport;
+  public readonly sportClass: Class;
 
-  constructor(id: number, rating: number, comment: string, sport: Sport) {
+  constructor(id: number, rating: number, comment: string, sportClass: Class) {
     this.id = id;
     this.rating = rating;
     this.comment = comment;
-    this.sport = sport;
+    this.sportClass = sportClass;
   }
 }
