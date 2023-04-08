@@ -1,8 +1,14 @@
-import { BadRequestException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpException,
+  HttpStatus,
+  Injectable,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { DailySchedule } from './dailySchedule.entity';
 import { DailyScheduleDto } from './dtos/dailySchedule.dto';
+import { Class } from '../class/class.entity';
 
 const daysOfWeek = [
   'Sunday',
@@ -24,14 +30,37 @@ export class DailyScheduleService {
     return await this.dailyScheduleRepository.find();
   }
 
-  async createDailySchedule(item: DailyScheduleDto): Promise<DailyScheduleDto> {
+  async createDailySchedule(
+    item: DailyScheduleDto,
+    sportClass: Class,
+  ): Promise<DailyScheduleDto | HttpException> {
     const dailySchedule = new DailyScheduleDto(
       item.id,
       this.getDateAndTime(new Date(item.date), item.time),
       this.getDayOfWeek(new Date(item.date)),
       item.sportClass,
     );
-    return await this.dailyScheduleRepository.save(dailySchedule);
+
+    const newDate = new Date(item.date);
+    newDate.setHours(0, 0, 0, 0);
+    const existingDates = sportClass.weeklySchedule.map((dailySchedule) => {
+      const existingDate = new Date(dailySchedule.date);
+      existingDate.setHours(0, 0, 0, 0);
+      return existingDate;
+    });
+
+    const dateExists = existingDates.some(
+      (date) => date.getTime() === newDate.getTime(),
+    );
+
+    if (!dateExists) {
+      console.log('Successfully created new daily schedule');
+      return await this.dailyScheduleRepository.save(dailySchedule);
+    } else
+      return new HttpException(
+        `Class schedule for chosen date already exists`,
+        HttpStatus.BAD_REQUEST,
+      );
   }
 
   async updateDailySchedule(

@@ -22,7 +22,7 @@ export class ClassService {
   async getClassById(id: number): Promise<Class> {
     return await this.classRepository.findOneOrFail({
       where: { id: id },
-      relations: ['users', 'sport', 'reviews'],
+      relations: ['users', 'sport', 'reviews', 'weeklySchedule'],
     });
   }
   async createClass(item: CreateClassDto): Promise<CreateClassDto> {

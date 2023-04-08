@@ -13,10 +13,14 @@ import {
 import { idException } from 'src/exceptions/idException';
 import { DailyScheduleService } from './dailySchedule.service';
 import { DailyScheduleDto } from './dtos/dailySchedule.dto';
+import { ClassService } from '../class/class.service';
 
 @Controller('api/dailySchedules')
 export class DailyScheduleController {
-  constructor(private readonly dailyScheduleService: DailyScheduleService) {}
+  constructor(
+    private readonly dailyScheduleService: DailyScheduleService,
+    private readonly classService: ClassService,
+  ) {}
 
   @Get()
   async getAllDailySchedules() {
@@ -33,12 +37,15 @@ export class DailyScheduleController {
   @Header('Content-Type', 'appliation/json')
   async createDailySchedule(
     @Body() scheduleDto: DailyScheduleDto,
-  ): Promise<DailyScheduleDto | void> {
+  ): Promise<DailyScheduleDto | HttpException> {
     try {
+      const sportClass = await this.classService.getClassById(
+        scheduleDto.sportClass.id,
+      );
       const dailySchedule = await this.dailyScheduleService.createDailySchedule(
         scheduleDto,
+        sportClass,
       );
-      console.log('Successfully created new daily schedule');
       return dailySchedule;
     } catch (err) {
       for (const key in scheduleDto) {
