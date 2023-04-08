@@ -5,7 +5,7 @@ import {
   ManyToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { AgeGroup } from '../age-group/ageGroup';
+import { AgeGroup } from '../ageGroup/ageGroup';
 import { Sport } from '../sport/sport.enitity';
 import { Class } from '../class/class.entity';
 

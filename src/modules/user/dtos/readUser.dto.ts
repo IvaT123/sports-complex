@@ -1,4 +1,4 @@
-import { AgeGroup } from 'src/modules/age-group/ageGroup';
+import { AgeGroup } from 'src/modules/ageGroup/ageGroup';
 import { Sport } from 'src/modules/sport/sport.enitity';
 
 export class ReadUserDto {

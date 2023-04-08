@@ -3,7 +3,6 @@ import {
   Controller,
   Delete,
   Get,
-  Header,
   HttpException,
   HttpStatus,
   Param,
@@ -12,10 +11,16 @@ import {
 } from '@nestjs/common';
 import { CreateUserDto } from './dtos/createUser.dto';
 import { UserService } from './user.service';
+import { idException } from 'src/exceptions/idException';
+import { User } from './user.entity';
+import { SportService } from '../sport/sport.service';
 
 @Controller('api/users')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly sportService: SportService,
+  ) {}
 
   @Get()
   async getAllUsers() {
@@ -33,14 +38,10 @@ export class UserController {
     try {
       return await this.userService.getUserById(id);
     } catch {
-      throw new HttpException(
-        'User with given id does not exist',
-        HttpStatus.NOT_FOUND,
-      );
+      throw idException;
     }
   }
   @Post()
-  @Header('Content-Type', 'appliation/json')
   async createUser(
     @Body() userDto: CreateUserDto,
   ): Promise<CreateUserDto | void> {
@@ -62,18 +63,35 @@ export class UserController {
       }
     }
   }
-  @Put(':id')
-  async updateUser(
-    @Param('id') id: number,
-    @Body() updateUserDto: CreateUserDto,
-  ) {
+  @Post(':userId/sports/:sportId/enroll')
+  async enrollUserInSport(
+    @Param('userId') userId: number,
+    @Param('sportId') sportId: number,
+  ): Promise<HttpStatus.ACCEPTED | HttpException> {
     try {
-      return await this.userService.updateUser(id, updateUserDto);
+      const sport = await this.sportService.getSportById(sportId);
+      return await this.userService.enrollUserInSport(userId, sport);
+    } catch (err) {
+      throw new Error(err);
+    }
+  }
+  @Post(':userId/sports/:sportId/disenroll')
+  async disenrollUserFromSport(
+    @Param('userId') userId: number,
+    @Param('sportId') sportId: number,
+  ): Promise<HttpStatus.ACCEPTED> {
+    try {
+      return await this.userService.disenrollUserFromSport(userId, sportId);
+    } catch (err) {
+      throw new Error(err.details);
+    }
+  }
+  @Put(':id')
+  async updateUser(@Param('id') id: number, @Body() updateUser: User) {
+    try {
+      return await this.userService.updateUser(id, updateUser);
     } catch {
-      throw new HttpException(
-        'User with given id does not exist',
-        HttpStatus.NOT_FOUND,
-      );
+      throw idException;
     }
   }
   @Delete(':id')
@@ -81,10 +99,7 @@ export class UserController {
     try {
       return await this.userService.deleteUser(id);
     } catch {
-      throw new HttpException(
-        'User with given id does not exist',
-        HttpStatus.NOT_FOUND,
-      );
+      throw idException;
     }
   }
 }
