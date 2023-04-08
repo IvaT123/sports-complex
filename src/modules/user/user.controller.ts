@@ -14,12 +14,14 @@ import { UserService } from './user.service';
 import { idException } from 'src/exceptions/idException';
 import { User } from './user.entity';
 import { SportService } from '../sport/sport.service';
+import { ClassService } from '../class/class.service';
 
 @Controller('api/users')
 export class UserController {
   constructor(
     private readonly userService: UserService,
     private readonly sportService: SportService,
+    private readonly classService: ClassService,
   ) {}
 
   @Get()
@@ -81,7 +83,12 @@ export class UserController {
     @Param('sportId') sportId: number,
   ): Promise<HttpStatus.ACCEPTED> {
     try {
-      return await this.userService.disenrollUserFromSport(userId, sportId);
+      const sportClasses = await this.classService.getClassesBySportId(sportId);
+      return await this.userService.disenrollUserFromSport(
+        userId,
+        sportId,
+        sportClasses.map((sportClass) => sportClass.id),
+      );
     } catch (err) {
       throw new Error(err.details);
     }

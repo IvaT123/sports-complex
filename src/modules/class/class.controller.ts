@@ -15,12 +15,14 @@ import { ClassService } from './class.service';
 import { CreateClassDto } from './dtos/createClass.dto';
 import { Class } from './class.entity';
 import { SportService } from '../sport/sport.service';
+import { UserService } from '../user/user.service';
 
 @Controller('api/classes')
 export class ClassController {
   constructor(
     private readonly classService: ClassService,
     private readonly sportService: SportService,
+    private readonly userService: UserService,
   ) {}
 
   @Get()
@@ -52,6 +54,8 @@ export class ClassController {
       classDto.duration = sport.classDuration;
       const sportClass = await this.classService.createClass(classDto);
       console.log('Successfully created new class');
+      const updatedClass = await this.classService.getClassById(sportClass.id);
+      await this.userService.assignClassToUsers(sport.users, updatedClass);
       return sportClass;
     } catch (err) {
       for (const key in classDto) {

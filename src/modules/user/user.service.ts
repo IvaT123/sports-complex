@@ -7,6 +7,7 @@ import { Repository } from 'typeorm';
 import { AgeGroup } from '../ageGroup/ageGroup';
 import { Sport } from '../sport/sport.enitity';
 import { idException } from 'src/exceptions/idException';
+import { Class } from '../class/class.entity';
 
 @Injectable()
 export class UserService {
@@ -24,6 +25,7 @@ export class UserService {
       },
       relations: {
         sports: true,
+        classes: true,
       },
     });
   }
@@ -35,6 +37,7 @@ export class UserService {
       item.email,
       this.calculateAgeGroup(item.age),
       item.sports,
+      item.classes,
     );
     return await this.userRepository.save(user);
   }
@@ -48,11 +51,13 @@ export class UserService {
       },
       relations: {
         sports: true,
+        classes: true,
       },
     });
     if (user) {
       if (user.sports.length < this.maxSportsQuantity) {
         user.sports.push(sport);
+        user.classes.push(...sport.classes);
         await this.userRepository.save(user);
         return HttpStatus.ACCEPTED;
       } else
@@ -67,6 +72,7 @@ export class UserService {
   async disenrollUserFromSport(
     userId: number,
     sportId: number,
+    classesIds: number[],
   ): Promise<HttpStatus.ACCEPTED> {
     const user = await this.userRepository.findOneOrFail({
       where: {
@@ -74,13 +80,34 @@ export class UserService {
       },
       relations: {
         sports: true,
+        classes: true,
       },
     });
     user.sports = user.sports.filter(
       (userSport) => userSport.id !== Number(sportId),
     );
+    user.classes = user.classes.filter(
+      (sportClass) => !classesIds.includes(sportClass.id),
+    );
     await this.userRepository.save(user);
     return HttpStatus.ACCEPTED;
+  }
+  async assignClassToUsers(users: User[], sportClass: Class) {
+    for (let i = 0; i < users.length; i++) {
+      const user = users[i];
+      if (user.ageGroup === sportClass.ageGroup) {
+        const userById = await this.userRepository.findOne({
+          where: {
+            id: user.id,
+          },
+          relations: {
+            classes: true,
+          },
+        });
+        userById.classes = [...userById.classes, sportClass];
+        await this.userRepository.save(userById);
+      }
+    }
   }
   async updateUser(id: number, item: CreateUserDto): Promise<User> {
     const user = await this.userRepository.findOneByOrFail({ id: id });

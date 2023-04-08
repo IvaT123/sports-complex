@@ -1,5 +1,6 @@
 import { IsNumber, Length, IsString, Max, Min } from 'class-validator';
 import { AgeGroup } from 'src/modules/ageGroup/ageGroup';
+import { Class } from 'src/modules/class/class.entity';
 import { Sport } from 'src/modules/sport/sport.enitity';
 
 export class CreateUserDto {
@@ -27,6 +28,8 @@ export class CreateUserDto {
 
   public readonly sports: Sport[];
 
+  public readonly classes: Class[];
+
   constructor(
     id: number,
     name: string,
@@ -34,6 +37,7 @@ export class CreateUserDto {
     email: string,
     ageGroup: AgeGroup,
     sports: Sport[],
+    classes: Class[],
   ) {
     this.id = id;
     this.name = name;
@@ -41,5 +45,6 @@ export class CreateUserDto {
     this.email = email;
     this.ageGroup = ageGroup;
     this.sports = sports;
+    this.classes = classes;
   }
 }
