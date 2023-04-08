@@ -16,8 +16,8 @@ export class SportService {
   }
   async getSportById(id: number): Promise<Sport> {
     return await this.sportRepository.findOne({
-      where: { id: id },
-      relations: ['users', 'users', 'classes'],
+      where: { id: Number(id) },
+      relations: ['users', 'classes'],
     });
   }
   async createSport(item: CreateSportDto): Promise<Sport> {

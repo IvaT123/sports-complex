@@ -1,6 +1,6 @@
 export enum AgeGroup {
   Children = 'Children',
   Youth = 'Youth',
-  YoungAdults = 'YoungAdults',
+  YoungAdults = 'Young Adults',
   Adults = 'Adults',
 }
