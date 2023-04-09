@@ -72,7 +72,8 @@ export class UserController {
   ): Promise<HttpStatus.ACCEPTED | HttpException> {
     try {
       const sport = await this.sportService.getSportById(sportId);
-      return await this.userService.enrollUserInSport(userId, sport);
+      const classes = await this.classService.getClassesBySportId(sportId);
+      return await this.userService.enrollUserInSport(userId, sport, classes);
     } catch (err) {
       throw new Error(err);
     }

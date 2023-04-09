@@ -1,4 +1,4 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Class } from './class.entity';
@@ -17,6 +17,7 @@ export class ClassService {
   async getClassesBySportId(id: number): Promise<Class[]> {
     return await this.classRepository.find({
       where: { sport: { id: id } },
+      relations: ['users'],
     });
   }
   async getClassById(id: number): Promise<Class> {
@@ -25,15 +26,27 @@ export class ClassService {
       relations: ['users', 'sport', 'reviews', 'weeklySchedule'],
     });
   }
-  async createClass(item: CreateClassDto): Promise<CreateClassDto> {
-    const sportsClass = new CreateClassDto(
+  async createClass(
+    item: CreateClassDto,
+    classes: Class[],
+  ): Promise<CreateClassDto | HttpException> {
+    const sportClass = new CreateClassDto(
       item.id,
       item.description,
       item.duration,
       item.ageGroup,
       item.sport,
     );
-    return await this.classRepository.save(sportsClass);
+    const classExists = classes.some(
+      (singleClass) => singleClass.ageGroup === sportClass.ageGroup,
+    );
+    if (!classExists) {
+      return await this.classRepository.save(sportClass);
+    } else
+      return new HttpException(
+        `Classes for ${sportClass.ageGroup.toLowerCase()} already exist for this sport`,
+        HttpStatus.BAD_REQUEST,
+      );
   }
   async updateClass(id: number, item: Class): Promise<Class> {
     const sportsClass = await this.classRepository.findOne({

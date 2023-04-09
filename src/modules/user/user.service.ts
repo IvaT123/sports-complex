@@ -12,6 +12,7 @@ import { Class } from '../class/class.entity';
 @Injectable()
 export class UserService {
   private readonly maxSportsQuantity: number = 2;
+  private readonly maxUsersPerClassQuantity: number = 10;
   constructor(
     @InjectRepository(User) private readonly userRepository: Repository<User>,
   ) {}
@@ -44,6 +45,7 @@ export class UserService {
   async enrollUserInSport(
     userId: number,
     sport: Sport,
+    classes: Class[],
   ): Promise<HttpStatus.ACCEPTED | HttpException> {
     const user = await this.userRepository.findOne({
       where: {
@@ -54,15 +56,26 @@ export class UserService {
         classes: true,
       },
     });
+    const sportClass = classes.find(
+      (singleClass) => singleClass.ageGroup === user.ageGroup,
+    );
     if (user) {
       if (user.sports.length < this.maxSportsQuantity) {
-        user.sports.push(sport);
-        user.classes.push(...sport.classes);
-        await this.userRepository.save(user);
+        if (sportClass.users.length < this.maxUsersPerClassQuantity) {
+          user.sports.push(sport);
+          user.classes.push(...sport.classes);
+          await this.userRepository.save(user);
+        } else
+          return new HttpException(
+            `User cannot enroll in this sport because maximum capacity of users in ${sportClass.ageGroup.toLowerCase()} group per class is ${
+              this.maxUsersPerClassQuantity
+            }`,
+            HttpStatus.BAD_REQUEST,
+          );
         return HttpStatus.ACCEPTED;
       } else
         return new HttpException(
-          `User can enroll in a maximum of ${this.maxSportsQuantity} sports`,
+          `User is already enrolled in ${this.maxSportsQuantity} sports, which is a maximum`,
           HttpStatus.BAD_REQUEST,
         );
     }

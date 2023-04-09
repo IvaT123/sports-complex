@@ -48,16 +48,23 @@ export class ClassController {
   @Header('Content-Type', 'appliation/json')
   async createClass(
     @Body() classDto: CreateClassDto,
-  ): Promise<CreateClassDto | void> {
+  ): Promise<CreateClassDto | HttpException> {
     try {
       const sport = await this.sportService.getSportById(classDto.sport.id);
       classDto.duration = sport.classDuration;
-      const sportClass = await this.classService.createClass(classDto);
-      console.log('Successfully created new class');
-      const updatedClass = await this.classService.getClassById(sportClass.id);
-      await this.userService.assignClassToUsers(sport.users, updatedClass);
+      const sportClass = await this.classService.createClass(
+        classDto,
+        sport.classes,
+      );
+      if ('id' in sportClass) {
+        const updatedClass = await this.classService.getClassById(
+          sportClass.id,
+        );
+        await this.userService.assignClassToUsers(sport.users, updatedClass);
+        console.log('Successfully created new class');
+      }
       return sportClass;
-    } catch (err) {
+    } catch {
       for (const key in classDto) {
         if (
           classDto[key as keyof typeof classDto] === undefined &&
