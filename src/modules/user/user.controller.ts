@@ -61,8 +61,9 @@ export class UserController {
             `Information about ${key} is required, but was not provided`,
             HttpStatus.BAD_REQUEST,
           );
-        } else console.log(err);
+        }
       }
+      throw new HttpException(err.detail, HttpStatus.BAD_REQUEST);
     }
   }
   @Post(':userId/sports/:sportId/enroll')

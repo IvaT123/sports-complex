@@ -4,6 +4,7 @@ import {
   JoinTable,
   ManyToMany,
   PrimaryGeneratedColumn,
+  Unique,
 } from 'typeorm';
 import { AgeGroup } from '../ageGroup/ageGroup';
 import { Sport } from '../sport/sport.enitity';
@@ -21,7 +22,14 @@ export class User {
   age: number;
 
   @Column()
+  @Unique(['email'])
   email: string;
+
+  @Column({ nullable: true })
+  verificationToken: string;
+
+  @Column({ default: false })
+  isVerified: boolean;
 
   @Column('enum', { enum: AgeGroup })
   ageGroup: AgeGroup;

@@ -8,6 +8,8 @@ import { AgeGroup } from '../ageGroup/ageGroup';
 import { Sport } from '../sport/sport.enitity';
 import { idException } from 'src/exceptions/idException';
 import { Class } from '../class/class.entity';
+import { generateToken } from '../auth/generateToken';
+import { sendVerificationEmail } from '../auth/verifyUser';
 
 @Injectable()
 export class UserService {
@@ -30,17 +32,27 @@ export class UserService {
       },
     });
   }
+  async getUserByVerificationToken(token: string): Promise<User> {
+    return await this.userRepository.findOne({
+      where: { verificationToken: token },
+    });
+  }
   async createUser(item: CreateUserDto): Promise<CreateUserDto> {
+    const verificationToken = generateToken();
     const user = new CreateUserDto(
       item.id,
       item.name,
       item.age,
       item.email,
+      verificationToken,
+      false,
       this.calculateAgeGroup(item.age),
       item.sports,
       item.classes,
     );
-    return await this.userRepository.save(user);
+    const newUser = await this.userRepository.save(user);
+    await sendVerificationEmail(user.email, verificationToken);
+    return newUser;
   }
   async enrollUserInSport(
     userId: number,
@@ -59,7 +71,7 @@ export class UserService {
     const sportClass = classes.find(
       (singleClass) => singleClass.ageGroup === user.ageGroup,
     );
-    if (user) {
+    if (user && user.isVerified) {
       if (user.sports.length < this.maxSportsQuantity) {
         if (sportClass.users.length < this.maxUsersPerClassQuantity) {
           user.sports.push(sport);
@@ -87,7 +99,7 @@ export class UserService {
     sportId: number,
     classesIds: number[],
   ): Promise<HttpStatus.ACCEPTED> {
-    const user = await this.userRepository.findOneOrFail({
+    const user = await this.userRepository.findOne({
       where: {
         id: userId,
       },
@@ -96,19 +108,21 @@ export class UserService {
         classes: true,
       },
     });
-    user.sports = user.sports.filter(
-      (userSport) => userSport.id !== Number(sportId),
-    );
-    user.classes = user.classes.filter(
-      (sportClass) => !classesIds.includes(sportClass.id),
-    );
-    await this.userRepository.save(user);
-    return HttpStatus.ACCEPTED;
+    if (user && user.isVerified) {
+      user.sports = user.sports.filter(
+        (userSport) => userSport.id !== Number(sportId),
+      );
+      user.classes = user.classes.filter(
+        (sportClass) => !classesIds.includes(sportClass.id),
+      );
+      await this.userRepository.save(user);
+      return HttpStatus.ACCEPTED;
+    }
   }
   async assignClassToUsers(users: User[], sportClass: Class) {
     for (let i = 0; i < users.length; i++) {
       const user = users[i];
-      if (user.ageGroup === sportClass.ageGroup) {
+      if (user.ageGroup === sportClass.ageGroup && user.isVerified) {
         const userById = await this.userRepository.findOne({
           where: {
             id: user.id,
@@ -129,6 +143,7 @@ export class UserService {
       name: item.name,
       age: item.age,
       email: item.email,
+      isVerified: item.isVerified,
       sports: user.sports,
     });
     return updatedUser;

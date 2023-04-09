@@ -21,6 +21,7 @@ import { DailyScheduleModule } from './modules/dailySchedule.ts/dailySchedule.mo
 import { DailyScheduleController } from './modules/dailySchedule.ts/dailySchedule.controller';
 import { DailyScheduleService } from './modules/dailySchedule.ts/dailySchedule.service';
 import { ClassController } from './modules/class/class.controller';
+import { AuthController } from './modules/auth/auth.controller';
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { ClassController } from './modules/class/class.controller';
     DailyScheduleModule,
   ],
   controllers: [
+    AuthController,
     UserController,
     SportController,
     ReviewController,

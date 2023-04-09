@@ -24,7 +24,11 @@ export class CreateUserDto {
   @IsString()
   public readonly email: string;
 
-  public ageGroup: AgeGroup;
+  public readonly verificationToken: string;
+
+  public isVerified: boolean;
+
+  public readonly ageGroup: AgeGroup;
 
   public readonly sports: Sport[];
 
@@ -35,6 +39,8 @@ export class CreateUserDto {
     name: string,
     age: number,
     email: string,
+    verificationToken: string,
+    isVerified: boolean,
     ageGroup: AgeGroup,
     sports: Sport[],
     classes: Class[],
@@ -43,6 +49,8 @@ export class CreateUserDto {
     this.name = name;
     this.age = age;
     this.email = email;
+    this.verificationToken = verificationToken;
+    this.isVerified = isVerified;
     this.ageGroup = ageGroup;
     this.sports = sports;
     this.classes = classes;
