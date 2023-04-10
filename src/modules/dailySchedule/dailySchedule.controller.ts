@@ -46,7 +46,7 @@ export class DailyScheduleController {
 
   @Post()
   @ApiBody({
-    description: 'The review to create.',
+    description: 'The daily schedule to create. Date format is MM.DD.YYYY',
     type: DailySchedule,
     examples: {
       example: {
@@ -60,11 +60,11 @@ export class DailyScheduleController {
   })
   @ApiOperation({
     summary:
-      'Creates new schedule unit if the date specified is not already taken for specific age group. New schedule gets assigned to class specified in the request body',
+      'Creates new schedule unit if the date specified is not already taken for specific age group. New schedule gets assigned to class specified in the request body. Day of the week is calculated automatically based on date.',
   })
   @ApiOkResponse({
     status: 201,
-    description: 'Newly created review.',
+    description: 'Newly created daily schedule.',
     type: DailySchedule,
   })
   async createDailySchedule(
@@ -96,6 +96,18 @@ export class DailyScheduleController {
   }
 
   @Put(':id')
+  @ApiBody({
+    description: 'The daily schedule to update.',
+    type: DailySchedule,
+    examples: {
+      example: {
+        value: {
+          date: '07.08.2023.',
+          time: '9:00',
+        },
+      },
+    },
+  })
   @ApiOperation({
     summary: 'Updates schedule unit',
   })

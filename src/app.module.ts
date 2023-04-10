@@ -16,10 +16,10 @@ import { SportModule } from './modules/sport/sport.module';
 import { ReviewModule } from './modules/review/review.module';
 import { ClassModule } from './modules/class/class.module';
 import { ClassService } from './modules/class/class.service';
-import { DailySchedule } from './modules/dailySchedule.ts/dailySchedule.entity';
-import { DailyScheduleModule } from './modules/dailySchedule.ts/dailySchedule.module';
-import { DailyScheduleController } from './modules/dailySchedule.ts/dailySchedule.controller';
-import { DailyScheduleService } from './modules/dailySchedule.ts/dailySchedule.service';
+import { DailySchedule } from './modules/dailySchedule/dailySchedule.entity';
+import { DailyScheduleModule } from './modules/dailySchedule/dailySchedule.module';
+import { DailyScheduleController } from './modules/dailySchedule/dailySchedule.controller';
+import { DailyScheduleService } from './modules/dailySchedule/dailySchedule.service';
 import { ClassController } from './modules/class/class.controller';
 import { AuthController } from './modules/auth/auth.controller';
 

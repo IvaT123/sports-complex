@@ -10,7 +10,7 @@ import { Sport } from '../sport/sport.enitity';
 import { User } from '../user/user.entity';
 import { AgeGroup } from '../ageGroup/ageGroup';
 import { Review } from '../review/review.entity';
-import { DailySchedule } from '../dailySchedule.ts/dailySchedule.entity';
+import { DailySchedule } from '../dailySchedule/dailySchedule.entity';
 
 @Entity()
 export class Class {

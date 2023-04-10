@@ -1,5 +1,5 @@
 import { AgeGroup } from 'src/modules/ageGroup/ageGroup';
-import { DailySchedule } from 'src/modules/dailySchedule.ts/dailySchedule.entity';
+import { DailySchedule } from 'src/modules/dailySchedule/dailySchedule.entity';
 import { Review } from 'src/modules/review/review.entity';
 import { Sport } from 'src/modules/sport/sport.enitity';
 import { User } from 'src/modules/user/user.entity';
