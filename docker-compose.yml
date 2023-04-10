@@ -1,5 +1,14 @@
 version: "3.9"
 services:
+  src:
+    build: .
+    image: sports-complex
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+    links:
+      - db
   db:
     image: postgres
     restart: always
