@@ -16,7 +16,7 @@ export class AuthController {
     user.isVerified = true;
     user.verificationToken = null;
 
-    await this.userService.updateUser(user.id, user);
+    await this.userService.verifyUser(user.id, user);
 
     return 'Email verified';
   }

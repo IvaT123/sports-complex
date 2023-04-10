@@ -32,11 +32,13 @@ export class UserService {
       },
     });
   }
+
   async getUserByVerificationToken(token: string): Promise<User> {
     return await this.userRepository.findOne({
       where: { verificationToken: token },
     });
   }
+
   async createUser(item: CreateUserDto): Promise<CreateUserDto> {
     const verificationToken = generateToken();
     const user = new CreateUserDto(
@@ -54,6 +56,21 @@ export class UserService {
     await sendVerificationEmail(user.email, verificationToken);
     return newUser;
   }
+
+  async verifyUser(id: number, item: CreateUserDto): Promise<User> {
+    const user = await this.userRepository.findOneByOrFail({ id: id });
+    const verifiedUser = await this.userRepository.save({
+      id: user.id,
+      name: item.name,
+      age: item.age,
+      email: item.email,
+      verificationToken: item.verificationToken,
+      isVerified: item.isVerified,
+      sports: user.sports,
+    });
+    return verifiedUser;
+  }
+
   async enrollUserInSport(
     userId: number,
     sport: Sport,
@@ -143,9 +160,6 @@ export class UserService {
       name: item.name,
       age: item.age,
       email: item.email,
-      verificationToken: item.verificationToken,
-      isVerified: item.isVerified,
-      sports: user.sports,
     });
     return updatedUser;
   }
