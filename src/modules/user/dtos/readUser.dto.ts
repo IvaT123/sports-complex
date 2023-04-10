@@ -7,6 +7,7 @@ export class ReadUserDto {
     public readonly name: string,
     public readonly age: number,
     public readonly email: string,
+    public readonly isVerified: boolean,
     public readonly ageGroup: AgeGroup,
     public readonly sports: Sport[],
   ) {}

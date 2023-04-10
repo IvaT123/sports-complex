@@ -3,7 +3,6 @@ import {
   Controller,
   Delete,
   Get,
-  Header,
   HttpException,
   HttpStatus,
   Param,
@@ -17,8 +16,17 @@ import { CreateClassDto } from './dtos/createClass.dto';
 import { Class } from './class.entity';
 import { SportService } from '../sport/sport.service';
 import { UserService } from '../user/user.service';
+import {
+  ApiBody,
+  ApiOkResponse,
+  ApiOperation,
+  ApiQuery,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 
 @Controller('api/classes')
+@ApiTags('classes')
 export class ClassController {
   constructor(
     private readonly classService: ClassService,
@@ -27,6 +35,43 @@ export class ClassController {
   ) {}
 
   @Get()
+  @ApiOperation({
+    summary:
+      'Get all classes or only those which satisfy queries passed by user.',
+  })
+  @ApiOkResponse({
+    status: 201,
+    description:
+      'Returns an array of classes that satisfy queries passed by user, or all classes if no query is specified',
+    type: [Class],
+  })
+  @ApiQuery({
+    name: 'sports',
+    required: false,
+    example: 'Football,Basketball',
+    description:
+      'Returns classes associated with listed sports, or with a single sport if only one is provided',
+  })
+  @ApiQuery({
+    name: 'duration',
+    required: false,
+    example: '1:30',
+    description: 'Refers to 1 hour and 30 minutes',
+  })
+  @ApiQuery({
+    name: 'ageGroups',
+    required: false,
+    example: 'Children,Youth',
+    description:
+      'Returns classes associated with listed age groups, or with a single age group if only one is provided',
+  })
+  @ApiQuery({
+    name: 'dayOfWeek',
+    required: false,
+    example: 'Saturday',
+    description:
+      'Returns classes that are scheduled for Saturday. Weekly schedule is not implemented, this endpoint refers to any class that is scheduled for at least one Saturday',
+  })
   async getAllClasses(
     @Query('sports') sports?: string,
     @Query('duration') duration?: string,
@@ -47,7 +92,10 @@ export class ClassController {
       );
     }
   }
+
   @Get(':id')
+  @ApiOperation({ summary: 'Gets class by id.' })
+  @ApiResponse({ status: 200, description: 'Single class by given id.' })
   async getClassById(@Param('id') id: number) {
     try {
       return await this.classService.getClassById(id);
@@ -55,8 +103,23 @@ export class ClassController {
       throw idException;
     }
   }
+
   @Post()
-  @Header('Content-Type', 'appliation/json')
+  @ApiBody({
+    description: 'The review to create.',
+    type: Class,
+    examples: {
+      example: {
+        value: {
+          description: 'Any description between 10 and 500 characters',
+          ageGroup: 'Children',
+          sport: { id: 2 },
+        },
+      },
+    },
+  })
+  @ApiOperation({ summary: 'Creates new sport class.' })
+  @ApiResponse({ status: 201, description: 'Newly created class.' })
   async createClass(
     @Body() classDto: CreateClassDto,
   ): Promise<CreateClassDto | HttpException> {
@@ -87,10 +150,13 @@ export class ClassController {
           );
         }
       }
-      throw err;
+      throw new Error(err.detail);
     }
   }
+
   @Put(':id')
+  @ApiOperation({ summary: 'Updates class by id.' })
+  @ApiResponse({ status: 200, description: 'Updated class' })
   async updateClass(@Param('id') id: number, @Body() updateClassDto: Class) {
     try {
       return await this.classService.updateClass(id, updateClassDto);
@@ -98,7 +164,9 @@ export class ClassController {
       throw idException;
     }
   }
+
   @Delete(':id')
+  @ApiOperation({ summary: 'Deletes sport by id.' })
   async deleteClass(@Param('id') id: number) {
     try {
       return await this.classService.deleteClass(id);

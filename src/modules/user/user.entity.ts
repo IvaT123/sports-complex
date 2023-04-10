@@ -3,12 +3,14 @@ import {
   Entity,
   JoinTable,
   ManyToMany,
+  OneToMany,
   PrimaryGeneratedColumn,
   Unique,
 } from 'typeorm';
 import { AgeGroup } from '../ageGroup/ageGroup';
 import { Sport } from '../sport/sport.enitity';
 import { Class } from '../class/class.entity';
+import { Review } from '../review/review.entity';
 
 @Entity()
 export class User {
@@ -40,4 +42,7 @@ export class User {
   @ManyToMany(() => Class, (classInstance) => classInstance.users)
   @JoinTable()
   classes: Class[];
+
+  @OneToMany(() => Review, (review) => review.user)
+  reviews: Review[];
 }

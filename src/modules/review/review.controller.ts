@@ -2,7 +2,6 @@ import {
   Body,
   Controller,
   Get,
-  Header,
   HttpException,
   HttpStatus,
   Post,
@@ -10,15 +9,28 @@ import {
 import { ReviewService } from './review.service';
 import { CreateReviewDto } from './dtos/createreview.dto';
 import { ClassService } from '../class/class.service';
+import { UserService } from '../user/user.service';
+import {
+  ApiBody,
+  ApiOkResponse,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
+import { Review } from './review.entity';
 
 @Controller('api/reviews')
+@ApiTags('reviews')
 export class ReviewController {
   constructor(
     private readonly reviewService: ReviewService,
     private readonly classService: ClassService,
+    private readonly userService: UserService,
   ) {}
 
   @Get()
+  @ApiOperation({ summary: 'Gets all reviews.' })
+  @ApiResponse({ status: 200, description: 'List of reviews.' })
   async getAllReviews() {
     try {
       return await this.reviewService.getAllReviews();
@@ -30,20 +42,50 @@ export class ReviewController {
     }
   }
   @Post()
-  @Header('Content-Type', 'appliation/json')
+  @ApiBody({
+    description: 'The review to create.',
+    type: Review,
+    examples: {
+      example: {
+        value: {
+          rating: 3,
+          comment: 'any comment with maximum of 500 characters',
+          sportClass: { id: 6 },
+        },
+      },
+    },
+  })
+  @ApiOperation({
+    summary:
+      'Allows verified user to create a review for the class specified in the request body.',
+  })
+  @ApiOkResponse({
+    status: 201,
+    description: 'Newly created review.',
+    type: Review,
+  })
+  @ApiResponse({
+    description: 'List of reviews.',
+    type: HttpException,
+  })
   async createReview(
     @Body() reviewDto: CreateReviewDto,
-  ): Promise<CreateReviewDto | void> {
+  ): Promise<CreateReviewDto | HttpException> {
     try {
-      const review = await this.reviewService.createReview(reviewDto);
-      console.log('New review successfully created');
-      const sportClass = await this.classService.getClassById(
-        review.sportClass.id,
+      const user = await this.userService.getUserById(reviewDto.user.id);
+      const review = await this.reviewService.createReview(
+        reviewDto,
+        user.isVerified,
       );
-      sportClass.averageRating = sportClass.updateAverageRating();
-      await this.classService.updateClass(sportClass.id, sportClass);
-
-      return review;
+      console.log('New review successfully created');
+      if ('id' in review) {
+        const sportClass = await this.classService.getClassById(
+          review.sportClass.id,
+        );
+        sportClass.averageRating = sportClass.updateAverageRating();
+        await this.classService.updateClass(sportClass.id, sportClass);
+        return review;
+      }
     } catch (err) {
       for (const key in reviewDto) {
         if (

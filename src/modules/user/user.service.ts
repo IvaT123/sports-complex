@@ -115,7 +115,7 @@ export class UserService {
     userId: number,
     sportId: number,
     classesIds: number[],
-  ): Promise<HttpStatus.ACCEPTED> {
+  ): Promise<HttpStatus.ACCEPTED | HttpException> {
     const user = await this.userRepository.findOne({
       where: {
         id: userId,
@@ -125,15 +125,21 @@ export class UserService {
         classes: true,
       },
     });
-    if (user && user.isVerified) {
-      user.sports = user.sports.filter(
-        (userSport) => userSport.id !== Number(sportId),
-      );
-      user.classes = user.classes.filter(
-        (sportClass) => !classesIds.includes(sportClass.id),
-      );
-      await this.userRepository.save(user);
-      return HttpStatus.ACCEPTED;
+    if (user) {
+      if (user.sports.some((sport) => sport.id === Number(sportId))) {
+        user.sports = user.sports.filter(
+          (userSport) => userSport.id !== Number(sportId),
+        );
+        user.classes = user.classes.filter(
+          (sportClass) => !classesIds.includes(sportClass.id),
+        );
+        await this.userRepository.save(user);
+        return HttpStatus.ACCEPTED;
+      } else
+        return new HttpException(
+          'Users cannot disenroll from sport they were not enrolled in',
+          HttpStatus.BAD_REQUEST,
+        );
     }
   }
   async assignClassToUsers(users: User[], sportClass: Class) {

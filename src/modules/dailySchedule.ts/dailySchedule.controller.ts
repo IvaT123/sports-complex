@@ -3,7 +3,6 @@ import {
   Controller,
   Delete,
   Get,
-  Header,
   HttpException,
   HttpStatus,
   Param,
@@ -14,8 +13,17 @@ import { idException } from 'src/exceptions/idException';
 import { DailyScheduleService } from './dailySchedule.service';
 import { DailyScheduleDto } from './dtos/dailySchedule.dto';
 import { ClassService } from '../class/class.service';
+import {
+  ApiBody,
+  ApiOkResponse,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
+import { DailySchedule } from './dailySchedule.entity';
 
 @Controller('api/dailySchedules')
+@ApiTags('dailySchedules')
 export class DailyScheduleController {
   constructor(
     private readonly dailyScheduleService: DailyScheduleService,
@@ -23,6 +31,8 @@ export class DailyScheduleController {
   ) {}
 
   @Get()
+  @ApiOperation({ summary: 'Gets all daily schedules.' })
+  @ApiResponse({ status: 200, description: 'List of daily schedules.' })
   async getAllDailySchedules() {
     try {
       return await this.dailyScheduleService.getAllDailySchedules();
@@ -33,8 +43,30 @@ export class DailyScheduleController {
       );
     }
   }
+
   @Post()
-  @Header('Content-Type', 'appliation/json')
+  @ApiBody({
+    description: 'The review to create.',
+    type: DailySchedule,
+    examples: {
+      example: {
+        value: {
+          date: '04.08.2023.',
+          time: '9:00',
+          sportClass: { id: 6 },
+        },
+      },
+    },
+  })
+  @ApiOperation({
+    summary:
+      'Creates new schedule unit if the date specified is not already taken for specific age group. New schedule gets assigned to class specified in the request body',
+  })
+  @ApiOkResponse({
+    status: 201,
+    description: 'Newly created review.',
+    type: DailySchedule,
+  })
   async createDailySchedule(
     @Body() scheduleDto: DailyScheduleDto,
   ): Promise<DailyScheduleDto | HttpException> {
@@ -62,7 +94,12 @@ export class DailyScheduleController {
       throw idException;
     }
   }
+
   @Put(':id')
+  @ApiOperation({
+    summary: 'Updates schedule unit',
+  })
+  @ApiResponse({ status: 200, description: 'Updated schedule unit' })
   async updateDailySchedule(
     @Param('id') id: number,
     @Body() updatedDailySchedule: DailyScheduleDto,
@@ -77,6 +114,9 @@ export class DailyScheduleController {
     }
   }
   @Delete(':id')
+  @ApiOperation({
+    summary: 'Deletes schedule unit',
+  })
   async deleteDailySchedule(@Param('id') id: number) {
     try {
       return await this.dailyScheduleService.deleteDailySchedule(id);

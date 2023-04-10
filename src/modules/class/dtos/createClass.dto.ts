@@ -33,29 +33,3 @@ export class CreateClassDto {
     this.sport = sport;
   }
 }
-/* 
-{
-  "name": "Football",
-  "classDuration": "2:00"
-}
-{
-  "description": "Best class in the wooooorld!!",
-  "ageGroup": "Children",
-  "sport": { "id": 2}
-}
-{
-  "name": "Pero Peric",
-  "age": 30,
-  "email": "pero.peric@somemail.com",
-}
-{
-  "date": "04.08.2023.",
-  "time": "9:00",
-  "sportClass": { "id": 6}
-}
-{
-  "rating": 5,
-  "comment": "didnt like it",
-  "sportClass": { "id": 6}
-}
-*/
