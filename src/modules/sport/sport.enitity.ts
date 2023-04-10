@@ -5,6 +5,7 @@ import {
   ManyToMany,
   OneToMany,
   PrimaryGeneratedColumn,
+  Unique,
 } from 'typeorm';
 import { User } from '../user/user.entity';
 import { Class } from '../class/class.entity';
@@ -15,6 +16,7 @@ export class Sport {
   id: number;
 
   @Column()
+  @Unique(['name'])
   name: string;
 
   @Column({ type: 'interval' })

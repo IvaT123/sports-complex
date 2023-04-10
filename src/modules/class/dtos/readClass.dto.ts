@@ -8,7 +8,7 @@ export class ReadClassDto {
   constructor(
     public readonly id: number,
     public readonly description: string,
-    public readonly weeklySchedule: DailySchedule[],
+    public readonly schedule: DailySchedule[],
     public duration: string,
     public readonly ageGroup: AgeGroup,
     public readonly sport: Sport,

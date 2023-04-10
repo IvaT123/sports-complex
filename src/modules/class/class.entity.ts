@@ -1,6 +1,4 @@
 import {
-  BeforeInsert,
-  BeforeUpdate,
   Column,
   Entity,
   ManyToMany,
@@ -29,7 +27,7 @@ export class Class {
   ageGroup: AgeGroup;
 
   @OneToMany(() => DailySchedule, (dailySchedule) => dailySchedule.sportClass)
-  weeklySchedule: DailySchedule[];
+  schedule: DailySchedule[];
 
   @ManyToOne(() => Sport, (sport) => sport.classes)
   sport: Sport;
@@ -42,14 +40,6 @@ export class Class {
 
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
   averageRating: number;
-
-  @BeforeInsert()
-  @BeforeUpdate()
-  validateUsersLength() {
-    if (this.users && this.users.length > 10) {
-      throw new Error('The maximum number of users for a class is 10');
-    }
-  }
 
   updateAverageRating() {
     if (this.reviews.length === 0) {

@@ -43,7 +43,7 @@ export class DailyScheduleService {
 
     const newDate = new Date(item.date);
     newDate.setHours(0, 0, 0, 0);
-    const existingDates = sportClass.weeklySchedule.map((dailySchedule) => {
+    const existingDates = sportClass.schedule.map((dailySchedule) => {
       const existingDate = new Date(dailySchedule.date);
       existingDate.setHours(0, 0, 0, 0);
       return existingDate;
@@ -103,7 +103,6 @@ export class DailyScheduleService {
     }
     const now = new Date();
     const userOffset = now.getTimezoneOffset();
-    console.log(userOffset);
     const newDate = date;
     newDate.setHours(hours);
     newDate.setMinutes(minutes - userOffset, 0, 0);

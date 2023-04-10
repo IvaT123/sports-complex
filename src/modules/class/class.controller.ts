@@ -9,6 +9,7 @@ import {
   Param,
   Post,
   Put,
+  Query,
 } from '@nestjs/common';
 import { idException } from 'src/exceptions/idException';
 import { ClassService } from './class.service';
@@ -26,9 +27,19 @@ export class ClassController {
   ) {}
 
   @Get()
-  async getAllClasses() {
+  async getAllClasses(
+    @Query('sports') sports?: string,
+    @Query('duration') duration?: string,
+    @Query('ageGroups') ageGroups?: string,
+    @Query('dayOfWeek') dayOfWeek?: string,
+  ) {
     try {
-      return await this.classService.getAllClasses();
+      return await this.classService.getAllClasses(
+        sports,
+        duration,
+        ageGroups,
+        dayOfWeek,
+      );
     } catch {
       throw new HttpException(
         'Internal server error',
@@ -64,7 +75,7 @@ export class ClassController {
         console.log('Successfully created new class');
       }
       return sportClass;
-    } catch {
+    } catch (err) {
       for (const key in classDto) {
         if (
           classDto[key as keyof typeof classDto] === undefined &&
@@ -76,7 +87,7 @@ export class ClassController {
           );
         }
       }
-      throw idException;
+      throw err;
     }
   }
   @Put(':id')

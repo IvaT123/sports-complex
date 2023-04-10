@@ -12,6 +12,6 @@ export class DailySchedule {
   @Column()
   dayOfWeek: string;
 
-  @ManyToOne(() => Class, (sportClass) => sportClass.weeklySchedule)
+  @ManyToOne(() => Class, (sportClass) => sportClass.schedule)
   sportClass: Class;
 }

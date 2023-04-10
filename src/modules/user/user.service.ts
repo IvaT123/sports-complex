@@ -143,6 +143,7 @@ export class UserService {
       name: item.name,
       age: item.age,
       email: item.email,
+      verificationToken: item.verificationToken,
       isVerified: item.isVerified,
       sports: user.sports,
     });
